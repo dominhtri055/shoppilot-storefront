@@ -2,8 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  const defaultSlug =
-    process.env.NEXT_PUBLIC_DEFAULT_STORE_SLUG?.trim();
+  const defaultSlug = process.env.NEXT_PUBLIC_DEFAULT_STORE_SLUG?.trim();
 
   if (defaultSlug) {
     redirect(`/shop/${defaultSlug}`);
@@ -16,17 +15,17 @@ export default function HomePage() {
           ShopPilot
         </p>
         <h1 className="text-4xl font-black tracking-tight text-slate-950 md:text-6xl">
-          Storefront setup required
+          Your next storefront starts here.
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-          Add NEXT_PUBLIC_DEFAULT_STORE_SLUG to .env.local or open a
-          published store directly at /shop/your-store-slug.
+          Create a look that feels like your brand. Preview your design, save a
+          draft, and publish it to your ShopPilot store.
         </p>
         <Link
-          href="/shop/your-store-slug"
+          href="/customize"
           className="mt-8 inline-flex rounded-2xl bg-slate-950 px-5 py-3 font-bold text-white"
         >
-          View example route
+          Open store designer
         </Link>
       </section>
     </main>
