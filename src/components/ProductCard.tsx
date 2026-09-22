@@ -7,17 +7,19 @@ type Props = {
   storeSlug: string;
   currency: string;
   product: PublicProduct;
+  showInventory?: boolean;
 };
 
 export function ProductCard({
   storeSlug,
   currency,
   product,
+  showInventory = true,
 }: Props) {
   return (
     <Link
       href={`/shop/${storeSlug}/products/${product.id}`}
-      className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+      className="store-product-card group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
     >
       {product.imagePath ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -36,16 +38,16 @@ export function ProductCard({
         <p className="text-sm font-semibold text-violet-700">
           {product.vendor}
         </p>
-        <h2 className="text-xl font-black text-slate-950">
-          {product.title}
-        </h2>
+        <h2 className="text-xl font-black text-slate-950">{product.title}</h2>
         <div className="flex items-center justify-between gap-4">
           <p className="font-black text-slate-950">
             {formatCurrency(product.price, currency)}
           </p>
-          <p className="text-sm text-slate-500">
-            {product.inventory} available
-          </p>
+          {showInventory && (
+            <p className="text-sm text-slate-500">
+              {product.inventory} available
+            </p>
+          )}
         </div>
       </div>
     </Link>

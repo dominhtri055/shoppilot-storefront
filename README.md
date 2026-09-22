@@ -114,3 +114,42 @@ This repository represents the current storefront MVP. Product browsing, cart be
 - Portfolio: https://tri-portfolio-pi.vercel.app/
 - GitHub: https://github.com/dominhtri055
 - LinkedIn: https://www.linkedin.com/in/trido2908/
+## Store designer
+
+Open `/customize` to sign in with an existing ShopPilot merchant email/password or try the device-local demo. The customer storefront uses the same rendering components as the designer preview.
+
+- Three starting styles: Studio, Editorial, Electric.
+- Brand and background colors with automatic contrasting text, sans/serif typography, soft/square cards.
+- Announcement, hero headline/body, HTTPS banner image URL, and story content.
+- Split/centered hero, desktop grid columns, section ordering, and visibility controls.
+- Separate **Save draft** and **Publish design** actions. Publishing the design does not change the store's publication status in ShopPilot Mobile.
+- Desktop/mobile preview, reset and restore-published actions, and unsaved-change navigation warning.
+
+### Enable durable merchant customization
+
+Apply `supabase/migrations/009_storefront_customization.sql` to the **existing shared Supabase project**, after ShopPilot Mobile migrations 001–007. This adds `storefront_themes` with owner-only row-level security and a public RPC that exposes only the published design of a published store. No service-role key is used. Existing stores retain the default appearance if the new RPC is not installed yet; merchant sign-in surfaces a setup error until the migration is applied.
+
+Use the existing `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` values. Keep the existing `NEXT_PUBLIC_DEFAULT_STORE_SLUG` for the root redirect. Store identity, logo and product management remain in ShopPilot Mobile. The editor reads the owner's active, in-stock products through authenticated RLS, so private stores can be previewed before publication.
+
+Merchant access tokens live only in memory; reloading the editor requires signing in again. Drafts live in Supabase. **Try the demo** never writes to Supabase: its saved settings are stored only on the current device. Banner images are supplied as HTTPS URLs; this version does not upload image files.
+
+### Validation
+
+```sh
+npm run build
+node --experimental-strip-types --test tests/theme.test.mjs
+```
+
+The RLS integration test uses an isolated PostgreSQL-compatible PGlite database, not the connected production database. Install `@electric-sql/pglite` in a temporary directory and provide its module path:
+
+```sh
+npm install --prefix /tmp/shoppilot-qa --no-package-lock @electric-sql/pglite
+PGLITE_MODULE=/tmp/shoppilot-qa/node_modules/@electric-sql/pglite/dist/index.js node tests/theme-rls.mjs
+```
+
+It checks cross-owner reads/writes, anonymous draft access, unpublished store privacy, and draft/published separation. The migration and real account sign-in must still be verified against the connected Supabase project before release.
+
+
+### Dashboard integration
+
+The companion merchant app now has a protected **Dashboard → Design website** screen using its existing session. It shares the same draft/published JSON contract and database table as `/customize`. Deploy both repositories after applying migration 009 once to the shared Supabase project. Migration 008_clear_demo_data in the mobile repository is unrelated and must not be run as part of this rollout. See the merchant repository’s `WEBSITE_DESIGN_SETUP.md` for release steps.
