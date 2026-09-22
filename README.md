@@ -122,6 +122,7 @@ Open `/customize` to sign in with an existing ShopPilot merchant email/password 
 - Brand and background colors with automatic contrasting text, sans/serif typography, soft/square cards.
 - Announcement, hero headline/body, HTTPS banner image URL, and story content.
 - Split/centered hero, desktop grid columns, section ordering, and visibility controls.
+- **Layout → Sections:** drag the dotted handle with a mouse or touch to move a section. A blue marker shows its destination; the preview updates on drop. Arrow buttons and ↑/↓ on a focused handle also reorder sections. Escape, an interrupted gesture, or dropping outside the list cancels the move. Hidden sections keep their position until shown again.
 - Separate **Save draft** and **Publish design** actions. Publishing the design does not change the store's publication status in ShopPilot Mobile.
 - Desktop/mobile preview, reset and restore-published actions, and unsaved-change navigation warning.
 
@@ -148,6 +149,15 @@ PGLITE_MODULE=/tmp/shoppilot-qa/node_modules/@electric-sql/pglite/dist/index.js 
 ```
 
 It checks cross-owner reads/writes, anonymous draft access, unpublished store privacy, and draft/published separation. The migration and real account sign-in must still be verified against the connected Supabase project before release.
+
+Drag-and-drop DOM interaction tests cover mouse/touch events, keyboard controls, cancellation, disabled controls and section-order preservation. Their geometry and pointer capture are mocked; they do not replace browser or device testing. The web sorter and ordering helper are mirrored in the dashboard.
+
+```sh
+npm install --prefix /tmp/shoppilot-dnd-qa --no-package-lock jsdom tsx
+JSDOM_MODULE=/tmp/shoppilot-dnd-qa/node_modules/jsdom/lib/api.js node --import /tmp/shoppilot-dnd-qa/node_modules/tsx/dist/loader.mjs --test tests/section-sorter.test.mjs
+# Run the same suite against the dashboard web implementation:
+SORTER_MODULE=../shoppilot-mobile/src/components/SectionSorter.web.tsx JSDOM_MODULE=/tmp/shoppilot-dnd-qa/node_modules/jsdom/lib/api.js node --import /tmp/shoppilot-dnd-qa/node_modules/tsx/dist/loader.mjs --test tests/section-sorter.test.mjs
+```
 
 
 ### Dashboard integration

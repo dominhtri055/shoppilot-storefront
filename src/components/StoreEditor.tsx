@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { StoreView } from "./StoreView";
 import { StoreSurface } from "./StoreSurface";
+import { SectionSorter } from "./SectionSorter";
 import {
   defaultTheme,
   isValidBanner,
@@ -83,6 +84,7 @@ export function StoreEditor() {
   const [tab, setTab] = useState("Design");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [draggingSection, setDraggingSection] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [published, setPublished] = useState<StoreTheme | null>(null);
   const [storePublished, setStorePublished] = useState(false);
@@ -240,14 +242,6 @@ export function StoreEditor() {
     setDirty(false);
     setMessage("");
   }
-  function move(index: number, direction: number) {
-    const sections = [...theme.sections];
-    [sections[index], sections[index + direction]] = [
-      sections[index + direction],
-      sections[index],
-    ];
-    update("sections", sections);
-  }
   const textField = (
     key: "announcement" | "heading" | "description" | "banner" | "about",
     label: string,
@@ -296,15 +290,15 @@ export function StoreEditor() {
         </span>
         {(session || demo) && (
           <div className="designer-actions">
-            <button disabled={busy} onClick={leave}>
+            <button disabled={busy || draggingSection} onClick={leave}>
               {demo ? "Exit demo" : "Sign out"}
             </button>
-            <button disabled={busy} onClick={() => save(false)}>
+            <button disabled={busy || draggingSection} onClick={() => save(false)}>
               Save draft
             </button>
             <button
               className="primary"
-              disabled={busy || demo}
+              disabled={busy || demo || draggingSection}
               onClick={() => save(true)}
             >
               {busy ? "Saving…" : "Publish design"}
@@ -529,31 +523,17 @@ export function StoreEditor() {
                       </select>
                     </label>
                     <h2>Sections</h2>
-                    {theme.sections.map((section, i) => (
-                      <div className="section-row" key={section}>
-                        <span>
-                          {section === "hero"
-                            ? "Hero banner"
-                            : section === "products"
-                              ? "Collection"
-                              : "Our story"}
-                        </span>
-                        <button
-                          aria-label={`Move ${section} up`}
-                          disabled={i === 0}
-                          onClick={() => move(i, -1)}
-                        >
-                          ↑
-                        </button>
-                        <button
-                          aria-label={`Move ${section} down`}
-                          disabled={i === 2}
-                          onClick={() => move(i, 1)}
-                        >
-                          ↓
-                        </button>
-                      </div>
-                    ))}
+                    <SectionSorter
+                      sections={theme.sections}
+                      hiddenSections={theme.sections.filter(
+                        (id) =>
+                          (id === "hero" && !theme.showHero) ||
+                          (id === "about" && !theme.showAbout),
+                      )}
+                      disabled={busy}
+                      onChange={(sections) => update("sections", sections)}
+                      onDragStateChange={setDraggingSection}
+                    />
                     {(["showHero", "showAbout", "showInventory"] as const).map(
                       (key, i) => (
                         <label className="check-field" key={key}>
